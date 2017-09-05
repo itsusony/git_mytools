@@ -1,7 +1,7 @@
 #! /usr/bin/env perl
 
 sub usage {
-    print "usage: gitcommitmove.pl TARGET_COMMIT_ID PLACE_COMMIT_ID\n";
+    print "usage: gitcommitmove TARGET_COMMIT_ID PLACE_COMMIT_ID\n";
     exit 1;
 }
 

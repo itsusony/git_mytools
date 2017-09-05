@@ -1,0 +1,17 @@
+#! /usr/bin/perl
+
+sub error {
+    print "gcn error!\n";
+    exit;
+}
+
+my $line = $ARGV[0];
+&error if $line !~ /^\d+$/;
+
+my $cmd = 'git branch | sed -e "s/^[* ]*//" | sed -n '.$line.'p';
+if (my $branch = `$cmd`){
+    chomp $branch;
+    system "git checkout $branch 2>\&1 >/dev/null;clear;git branch | awk -F'\t' '{print NR\":\"\$1}'";
+}else{
+    &error;
+}
