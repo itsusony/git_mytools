@@ -1,0 +1,56 @@
+#! /usr/bin/perl
+
+my $origin_name = $ARGV[0] // 'origin';
+
+sub error {
+    print "gunexist error!\n";
+    exit;
+}
+
+sub trim {
+    s/^\s*//;
+}
+
+if (my $local = `git branch | grep -v master`) {
+    my @arr = split '\n', $local;
+    &error if @arr == 0;
+    map { trim; s/^\* //; } @arr;
+
+    my $remote_local = `git branch -a | grep remotes | grep -v '\/master'`;
+    my @rarr = split '\n', $remote_local;
+    &error if @rarr == 0;
+
+    my $h = {}; 
+    map { trim; s/^remotes\/$origin_name\///; $h->{$_}=1; } @rarr;
+
+    my $i = 1;
+    my @candi;
+    for (@arr){
+        unless ($h->{$_}) {
+            print "$i:".$_."\n";
+            $i++;
+            push @candi,$_;
+        }   
+    }   
+    retry:
+    print "which to delete? (1-".($i-1)."): ";
+    my $ans = readline;
+    chomp $ans;
+    if (defined $ans && $ans =~ /^\d+$/ && $candi[$ans-1]) {
+        my $cmd = 'git branch -D '.$candi[$ans-1];
+        retry2:
+        print $cmd." (Y/n): ";
+        $ans = readline; chomp $ans;
+        if ($ans eq 'Y') {
+            `git checkout master;$cmd`;
+        } elsif ($ans eq 'n') {
+            print "bye!\n";exit;
+        } else {
+            goto retry2;
+        }   
+    } else {
+        goto retry;
+    }   
+} else {
+    &error;
+}
