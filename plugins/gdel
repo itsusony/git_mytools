@@ -1,0 +1,20 @@
+#! /usr/bin/perl
+
+sub error {
+    print "gdel error!\n";
+    exit;
+}
+
+my $line = $ARGV[0];
+&error if $line !~ /^\d+$/;
+
+my $cmd = 'git branch | sed -e "s/^[* ]*//" | sed -n '.$line.'p';
+if (my $branch = `$cmd`){
+    chomp $branch;
+    print "git branch -D $branch ? (Y/n) ";
+    my $ans = <STDIN>;
+    chomp $ans if $ans;
+    system "git checkout master 2>\&1 >/dev/null;git branch -D $branch;clear;git branch | awk -F'\t' '{print NR\":\"\$1}';" if $ans =~ /^y$/i;
+}else{
+    &error;
+}
